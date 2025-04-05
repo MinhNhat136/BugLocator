@@ -125,7 +125,7 @@ class Parser:
                 src_files[os.path.relpath(src_file, start=self.src)] = SourceFile(src, comments, class_names,
                                                                                   attributes, method_names, variables, [
                                                                                       os.path.basename(src_file).split(
-                                                                                          '.')[0]], package_name, total_lines)
+                                                                                          '.')[0]], package_name, total_lines, os.path.relpath(src_file, start=self.src))
             else:
                 # If source files has package declaration
                 if package_name:
@@ -133,7 +133,7 @@ class Parser:
                 else:
                     src_id = os.path.basename(src_file)
                 src_files[src_id] = SourceFile(src, comments, class_names, attributes, method_names, variables,
-                                               [os.path.basename(src_file).split('.')[0]], package_name, total_lines)
+                                               [os.path.basename(src_file).split('.')[0]], package_name, total_lines, src_id)
             # print(src_files)
             # print("===========")
         return src_files
@@ -321,6 +321,8 @@ class ReportPreprocessor(Preprocessor):
 
 class SrcPreprocessor(Preprocessor):
     """class to preprocess source code"""
+
+
     def pos_tagging(self):
         """Extracing specific pos tags from comments"""
         for src in self.datas.values():
@@ -415,9 +417,9 @@ class SrcPreprocessor(Preprocessor):
                    "method_names", "variables", "package_name", "pos_tagged_comments", 'total_lines']
 
         rows = []
-        for src in self.datas.values():
+        for key, src in self.datas.items():
             rows.append([
-                src.exact_file_name,
+                f"{key}",
                 " ".join(src.file_name) if isinstance(src.file_name, list) else src.file_name,
                 " ".join(src.all_content) if isinstance(src.all_content, list) else src.all_content,
                 " ".join(src.comments) if isinstance(src.comments, list) else src.comments,
